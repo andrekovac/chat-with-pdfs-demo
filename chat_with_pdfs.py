@@ -7,12 +7,21 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
+import os
+from config import OPENAI_API_KEY
+
 class bcolors:
     GREEN = '\033[92m'
-    ENDCOLOR = '\033[0m'
-    
+    ENDCOLOR = '\033[0m' 
+
+os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
+
 # Load, convert to text and split pdf file into pages
-loader = PyPDFLoader("Tesla_Annual_Report_2023_Jan31.pdf")
+
+# pdf_name = "Tesla_Annual_Report_2023_Jan31.pdf"
+pdf_name = "Pizzeria Da Nino am Eigerplatz Bern » 031 371 11 31.pdf"
+
+loader = PyPDFLoader(pdf_name)
 pages = loader.load_and_split()
 
 # Chunk each page into sections
@@ -35,7 +44,9 @@ memory = ConversationBufferMemory(
 chain = ConversationalRetrievalChain.from_llm(
     llm=OpenAI(),
     retriever=retriever,
-    memory=memory)
+    memory=memory,
+    verbose=True
+)
 
 
 # Collect user input and simulate chat with pdf
@@ -44,7 +55,7 @@ if platform.system() == "Windows":
 else:
     eof_key = "<Ctrl+D>"
 
-print(f'Lets talk with Tesla annual report 2023. What would you like to know? Or press {eof_key} to exit.')
+print(f'Lets talk with the menu of Pizzeria Da Nino in Bern. What would you like to know? Or press {eof_key} to exit.')
 while True:
     try:
         user_input = input('Q:')
@@ -54,9 +65,12 @@ while True:
     except KeyboardInterrupt:
         break
 
-print("Bye!")
+print("Done")
 
 
-#print(chain({'question': 'What was Tesla total revenues and net income?'}))
-#print(chain({'question': 'Sum these values?'}))
-#print(chain({'question': 'What was the main risk factors for Tesla?'}))
+# Test 1:
+#print(chain({'question': 'Which is the most used pizza topping?'}))
+
+# Test 2 (including memory):
+#print(chain({'question': 'Which pizza has the most toppings?'}))
+#print(chain({'question': 'How many toppings does it have?'}))
